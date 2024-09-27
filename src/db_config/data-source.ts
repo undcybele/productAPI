@@ -1,4 +1,5 @@
 import { DataSource } from 'typeorm';
+import {ProductEntity} from "../entities/product.entities";
 
 export const ProductDataSource = new DataSource({
     type: 'postgres',
@@ -9,7 +10,13 @@ export const ProductDataSource = new DataSource({
     database: process.env.DB_NAME || 'product_db',
     synchronize: true, //true only for dev
     logging: false,
-    entities: [],
-    migrations: ['src/migrations/**/*.ts'],
-    subscribers: ['src/subscribers/**/*.ts'],
+    entities: [ProductEntity]
 });
+
+ProductDataSource.initialize()
+    .then(() => {
+        console.log('Data Source has been initialized!');
+    })
+    .catch((err) => {
+        console.error('Error during Data Source initialization:', err);
+    });
