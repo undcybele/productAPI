@@ -9,14 +9,16 @@ import {
 
 const router: Router = Router();
 
-router.get(`/`, getAllProducts);
+const entityPath = "products";
 
-router.get(`/{:id}`, getProductById);
+router.get(`/${entityPath}`, getAllProducts);
 
-router.post(`/`, createProduct);
+router.get(`/${entityPath}/:id`, getProductById);
 
-router.put(`/{:id}`, updateProductById);
+router.post(`/${entityPath}`, createProduct);
 
-router.delete('/{:id}', deleteProductById);
+router.put(`/${entityPath}/:id`, updateProductById);
+
+router.delete(`/${entityPath}/:id`, deleteProductById);
 
 export default router;
