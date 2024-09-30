@@ -1,6 +1,6 @@
 import request from 'supertest';
 import { ProductEntity } from '../../entities/product.entities';
-import {testApp, closeTestApp, initializeTestApp, testDataSource} from "../config";
+import {testApp, testDataSource} from "../config";
 import {CreateOrUpdateProductDto} from "../../dtos/product.dto";
 
 describe('Products API Integration Tests', () => {

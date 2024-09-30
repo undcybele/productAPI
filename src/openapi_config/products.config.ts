@@ -1,9 +1,30 @@
 export const productPaths = {
     "/products": {
         get: {
-            summary: "Retrieve a list of all products",
-            description: "This API retrieves all products from the database.",
-            tags: ["Products"],
+            summary: "Retrieve all products",
+            operationId: "getAllProducts",
+            parameters: [
+                {
+                    name: "limit",
+                    in: "query",
+                    description: "Number of products to retrieve",
+                    required: false,
+                    schema: {
+                        type: "integer",
+                        example: 10
+                    }
+                },
+                {
+                    name: "page",
+                    in: "query",
+                    description: "Page number for pagination",
+                    required: false,
+                    schema: {
+                        type: "integer",
+                        example: 1
+                    }
+                }
+            ],
             responses: {
                 200: {
                     description: "A list of products",
@@ -12,10 +33,6 @@ export const productPaths = {
                             schema: {
                                 type: "object",
                                 properties: {
-                                    message: {
-                                        type: "string",
-                                        example: "success"
-                                    },
                                     products: {
                                         type: "array",
                                         items: {
@@ -39,8 +56,7 @@ export const productPaths = {
                                         example: "Failed to retrieve products"
                                     },
                                     error: {
-                                        type: "string",
-                                        example: "Internal server error"
+                                        type: "string"
                                     }
                                 }
                             }
@@ -51,13 +67,13 @@ export const productPaths = {
         },
         post: {
             summary: "Create a new product",
-            description: "This API creates a new product.",
-            tags: ["Products"],
+            operationId: "createProduct",
             requestBody: {
+                required: true,
                 content: {
                     "application/json": {
                         schema: {
-                            $ref: "#/components/schemas/CreateProductDto"
+                            $ref: "#/components/schemas/CreateOrUpdateProductDto"
                         }
                     }
                 }
@@ -72,9 +88,9 @@ export const productPaths = {
                                 properties: {
                                     message: {
                                         type: "string",
-                                        example: "Product created successfully"
+                                        example: "Created a product"
                                     },
-                                    product: {
+                                    createdProduct: {
                                         $ref: "#/components/schemas/Product"
                                     }
                                 }
@@ -94,8 +110,7 @@ export const productPaths = {
                                         example: "Failed to create product"
                                     },
                                     error: {
-                                        type: "string",
-                                        example: "Internal server error"
+                                        type: "string"
                                     }
                                 }
                             }
@@ -108,22 +123,21 @@ export const productPaths = {
     "/products/{id}": {
         get: {
             summary: "Retrieve a product by ID",
-            description: "This API retrieves a product by its ID.",
-            tags: ["Products"],
+            operationId: "getProductById",
             parameters: [
                 {
                     name: "id",
                     in: "path",
                     required: true,
+                    description: "ID of the product to retrieve",
                     schema: {
                         type: "integer"
-                    },
-                    description: "The product ID"
+                    }
                 }
             ],
             responses: {
                 200: {
-                    description: "Product retrieved successfully",
+                    description: "Product found",
                     content: {
                         "application/json": {
                             schema: {
@@ -147,29 +161,48 @@ export const productPaths = {
                             }
                         }
                     }
+                },
+                500: {
+                    description: "Failed to retrieve product",
+                    content: {
+                        "application/json": {
+                            schema: {
+                                type: "object",
+                                properties: {
+                                    message: {
+                                        type: "string",
+                                        example: "Failed to retrieve product"
+                                    },
+                                    error: {
+                                        type: "string"
+                                    }
+                                }
+                            }
+                        }
+                    }
                 }
             }
         },
         put: {
             summary: "Update a product by ID",
-            description: "This API updates a product by its ID.",
-            tags: ["Products"],
+            operationId: "updateProductById",
             parameters: [
                 {
                     name: "id",
                     in: "path",
                     required: true,
+                    description: "ID of the product to update",
                     schema: {
                         type: "integer"
-                    },
-                    description: "The product ID"
+                    }
                 }
             ],
             requestBody: {
+                required: true,
                 content: {
                     "application/json": {
                         schema: {
-                            $ref: "#/components/schemas/UpdateProductDTO"
+                            $ref: "#/components/schemas/CreateOrUpdateProductDto"
                         }
                     }
                 }
@@ -180,16 +213,7 @@ export const productPaths = {
                     content: {
                         "application/json": {
                             schema: {
-                                type: "object",
-                                properties: {
-                                    message: {
-                                        type: "string",
-                                        example: "Product updated successfully"
-                                    },
-                                    product: {
-                                        $ref: "#/components/schemas/Product"
-                                    }
-                                }
+                                $ref: "#/components/schemas/Product"
                             }
                         }
                     }
@@ -222,8 +246,7 @@ export const productPaths = {
                                         example: "Failed to update product"
                                     },
                                     error: {
-                                        type: "string",
-                                        example: "Internal server error"
+                                        type: "string"
                                     }
                                 }
                             }
@@ -234,17 +257,16 @@ export const productPaths = {
         },
         delete: {
             summary: "Delete a product by ID",
-            description: "This API deletes a product by its ID.",
-            tags: ["Products"],
+            operationId: "deleteProductById",
             parameters: [
                 {
                     name: "id",
                     in: "path",
                     required: true,
+                    description: "ID of the product to delete",
                     schema: {
                         type: "integer"
-                    },
-                    description: "The product ID"
+                    }
                 }
             ],
             responses: {
@@ -292,8 +314,7 @@ export const productPaths = {
                                         example: "Failed to delete product"
                                     },
                                     error: {
-                                        type: "string",
-                                        example: "Internal server error"
+                                        type: "string"
                                     }
                                 }
                             }
@@ -311,102 +332,39 @@ export const productComponents = {
             type: "object",
             properties: {
                 id: {
-                    type: "integer",
-                    description: "The unique identifier for a product",
-                    example: 1
+                    type: "integer"
                 },
                 name: {
-                    type: "string",
-                    description: "The name of the product",
-                    example: "Product A"
+                    type: "string"
                 },
                 description: {
-                    type: "string",
-                    description: "A brief description of the product",
-                    example: "This is a sample product."
+                    type: "string"
                 },
                 category: {
-                    type: "string",
-                    description: "The category to which the product belongs",
-                    example: "Electronics"
+                    type: "string"
                 },
-                createdAt: {
-                    type: "string",
-                    format: "date-time",
-                    description: "The date and time when the product was created",
-                    example: "2023-09-27T12:34:56Z"
+                createdBy: {
+                    type: "string"
                 },
-                updatedAt: {
-                    type: "string",
-                    format: "date-time",
-                    description: "The date and time when the product was last updated",
-                    example: "2023-09-28T12:34:56Z"
+                updatedBy: {
+                    type: "string"
                 }
-            },
-            required: ["id", "name", "description", "category", "createdAt", "updatedAt"]
+            }
         },
-        SearchProductDto: {
+        CreateOrUpdateProductDto: {
             type: "object",
-            properties: {
-                page: {
-                    type: "integer",
-                    description: "The page number for pagination",
-                    example: 1
-                },
-                limit: {
-                    type: "integer",
-                    description: "The maximum number of products to return per page",
-                    example: 10
-                }
-            },
-            required: ["page", "limit"]
-        },
-        CreateProductDto: {
-            type: "object",
+            required: ["name", "description", "category"],
             properties: {
                 name: {
-                    type: "string",
-                    description: "The name of the product",
-                    example: "Product X"
+                    type: "string"
                 },
                 description: {
-                    type: "string",
-                    description: "A description of the product",
-                    example: "This is an example of a product."
+                    type: "string"
                 },
                 category: {
-                    type: "string",
-                    description: "The category of the product",
-                    example: "Electronics"
+                    type: "string"
                 }
-            },
-            required: ["name", "description", "category"]
-        },
-        UpdateProductDto: {
-            type: "object",
-            properties: {
-                id: {
-                    type: "integer",
-                    description: "The unique identifier for the product to be updated",
-                    example: 1
-                },
-                name: {
-                    type: "string",
-                    description: "The updated name of the product",
-                    example: "Updated Product A"
-                },
-                description: {
-                    type: "string",
-                    description: "The updated description of the product",
-                    example: "This is an updated description."
-                },
-                category: {
-                    type: "string",
-                    description: "The updated category of the product",
-                    example: "Home Appliances"
-                }
-            },
-            required: ["id", "name", "description", "category"]
+            }
         }
     }
 }

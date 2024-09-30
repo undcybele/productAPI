@@ -1,5 +1,4 @@
 import { Request, Response } from 'express';
-import {IProduct} from "../models/products.model";
 import {ProductsService} from "../services/products.service";
 import {CreateOrUpdateProductDto, SearchProductDto} from "../dtos/product.dto";
 import {ProductEntity} from "../entities/product.entities";
@@ -11,7 +10,7 @@ const productService = new ProductsService(ProductDataSource.getRepository(Produ
 export const getAllProducts = async (req: Request, res: Response): Promise<void> => {
     try {
         const products = await productService.getProducts(req.body as SearchProductDto);
-        res.status(200).json({ message: 'success', products: products });
+        res.status(200).json({ products: products });
     } catch (error) {
         console.error(error);
         res.status(500).json({ message: 'Failed to retrieve products', error });
@@ -49,7 +48,7 @@ export const createProduct = async (req: Request, res: Response): Promise<void> 
 // PUT /api/products/{id}
 export const updateProductById = async (req: Request, res: Response): Promise<void> => {
     const { id } = req.params;
-    const updatedData = req.body as IProduct;
+    const updatedData = req.body as CreateOrUpdateProductDto;
     try {
         const updatedProduct = await productService.updateExistingProduct(id, updatedData);
         if (updatedProduct) {
