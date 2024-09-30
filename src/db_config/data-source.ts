@@ -12,11 +12,3 @@ export const ProductDataSource = new DataSource({
     logging: false,
     entities: [ProductEntity]
 });
-
-ProductDataSource.initialize()
-    .then(() => {
-        console.log('Data Source has been initialized!');
-    })
-    .catch((err) => {
-        console.error('Error during Data Source initialization:', err);
-    });

@@ -1,9 +1,11 @@
 import { Request, Response } from 'express';
 import {IProduct} from "../models/products.model";
 import {ProductsService} from "../services/products.service";
-import {CreateProductDto, SearchProductDto} from "../dtos/product.dto";
+import {CreateOrUpdateProductDto, SearchProductDto} from "../dtos/product.dto";
+import {ProductEntity} from "../entities/product.entities";
+import {ProductDataSource} from "../db_config/data-source";
 
-const productService = new ProductsService();
+const productService = new ProductsService(ProductDataSource.getRepository(ProductEntity));
 
 // GET /api/products
 export const getAllProducts = async (req: Request, res: Response): Promise<void> => {
@@ -19,10 +21,9 @@ export const getAllProducts = async (req: Request, res: Response): Promise<void>
 // GET /api/products/{id}
 export const getProductById = async (req: Request, res: Response): Promise<void> => {
     const { id } = req.params;
-    console.log('id', id);
     if(!id) res.status(402).json('Invalid id');
     try {
-        const product = await productService.getProductById(id);
+        const product = await productService.getProductById(parseInt(id));
         if (product) {
             res.status(200).json(product);
         } else {
@@ -36,7 +37,7 @@ export const getProductById = async (req: Request, res: Response): Promise<void>
 // POST /api/products
 export const createProduct = async (req: Request, res: Response): Promise<void> => {
     try {
-        const newProductData: CreateProductDto = req.body;
+        const newProductData: CreateOrUpdateProductDto = req.body;
         const createdProduct = await productService.addProduct(newProductData);
         if(!createdProduct) throw Error;
         res.status(201).json({ message: 'Created a product', createdProduct });
@@ -65,7 +66,7 @@ export const updateProductById = async (req: Request, res: Response): Promise<vo
 export const deleteProductById = async (req: Request, res: Response): Promise<void> => {
     const { id } = req.params;
     try {
-        const isDeleted = await productService.deleteExistingProduct(id);
+        const isDeleted = await productService.deleteExistingProduct(parseInt(id));
         if (isDeleted) {
             res.status(200).json({ message: 'Product deleted successfully' });
         } else {

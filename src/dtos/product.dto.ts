@@ -3,14 +3,7 @@ export interface SearchProductDto {
     limit: number;
 }
 
-export interface CreateProductDto {
-    name: string;
-    description: string;
-    category: string;
-}
-
-export interface UpdateProductDto {
-    id: number;
+export interface CreateOrUpdateProductDto {
     name: string;
     description: string;
     category: string;
